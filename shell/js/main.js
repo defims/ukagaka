@@ -1,18 +1,22 @@
 require([],function(){
 
 //listener
-var keyframes    = function(name, value){
+var $    = function(name, value){
     console.log(name,value);
 };
 
-var $ = function(str, value){
+var keyframes = function(name, value){
     var cssAnimation = document.createElement('style');
     cssAnimation.type = 'text/css';
-    var content = '@-webkit-keyframes '+ str +' {';
-    for(key in value){
-        content += key + ' '; 
-        for()
-        content += key + ' ';
+    var content = '@-webkit-keyframes '+ name +' {';
+	var frameValue,propValue;
+    for(var frameKey in value){
+		frameValue	= value[frameKey];
+        content += framekey + ' {'; 
+        for(var propName in frame)
+			propValue	= frame[propName];
+        content += propName + ' ';
+		
         '80% { left:150px; }'+
         '90% { left:160px; }'+
         'to { left:150px; }'+
