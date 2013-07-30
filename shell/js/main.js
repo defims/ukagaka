@@ -3,26 +3,41 @@ require([],function(){
 //listener
 var $    = function(name, value){
     console.log(name,value);
+	var dom	 = document.querySelector(name);
+	for(var styleAttr in value){
+		//browser handle
+		var privateProperties	= ['animation'],
+			browserPrefix		= 'Webkit',
+			prop				= '';
+		for(var i=0; i<privateProperties.length; i++){
+			prop	= privateProperties[i];
+			if(prop == styleAttr){
+				browserStyleAttr	= browserPrefix + styleAttr.substring(0,1).toUpperCase() + styleAttr.substring(1);
+			}
+		}
+
+		dom.style[browserStyleAttr] = value[styleAttr];
+	}
 };
 
 var keyframes = function(name, value){
     var cssAnimation = document.createElement('style');
     cssAnimation.type = 'text/css';
-    var content = '@-webkit-keyframes '+ name +' {';
-	var frameValue,propValue;
+
+	var frameValue,
+		propValue,
+		content = '@-webkit-keyframes '+ name +' {\n\r';
     for(var frameKey in value){
 		frameValue	= value[frameKey];
-        content += framekey + ' {'; 
-        for(var propName in frame)
-			propValue	= frame[propName];
-        content += propName + ' ';
-		
-        '80% { left:150px; }'+
-        '90% { left:160px; }'+
-        'to { left:150px; }'+
-    '}');
+        content += '    '+frameKey + ' {\n\r'; 
+        for(var propName in frameValue)	
+			content += '        ' + propName + ':' + frameValue[propName] + ';\n\r';
+        content += '    }\n\r'; 
+	}
+    content += '}'; 
 
-    var rules = document.createTextNode();
+	console.log(content);
+    var rules = document.createTextNode(content);
     cssAnimation.appendChild(rules);
     document.getElementsByTagName("head")[0].appendChild(cssAnimation);
 };
