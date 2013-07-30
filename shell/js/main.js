@@ -22,6 +22,57 @@ var $ = function(str, value){
     cssAnimation.appendChild(rules);
     document.getElementsByTagName("head")[0].appendChild(cssAnimation);
 };
+/**/
+$('#dom',{
+    'animation' : 'myanim 5s';
+    'faces' : 'foot';
+}
+faces('foot', {
+    '0deg,0deg,0deg'  : {
+        'background-position' : '10px,2px' 
+    },
+    '10deg,0deg,0deg'  : {
+        'background-position' : '2px,0px' 
+    }
+})
+keyframes('myanim', {
+    'from'  : {
+        'rotate3d'     : '10deg,0deg,0deg' 
+    },
+    'to'  : {
+        'rotate3d'     : '50deg,0deg,0deg' 
+    }
+})
+/**/
+
+
+
+/**
+$('#dom',{
+    'animation' : 'myanim 5s'
+})
+
+keyframes('myanim', {
+    '0%'    : { 
+        'background'    : 'red'
+    },
+    '50%'   : {
+        'background'    : 'blue'
+    },
+    '100%'  : {
+        'background'    : 'green'
+    }
+})
+
+/**/
+
+
+
+
+
+
+
+
 
 //conforence
 /**
@@ -42,23 +93,6 @@ keyframes('myanim') = {
 }
 /**/
 
-/**/
-$('#dom',{
-    'animation' : 'myanim 5s'
-})
-
-keyframes('myanim', {
-    '0%'    : { 
-        'background'    : 'red'
-    },
-    '50%'   : {
-        'background'    : 'blue'
-    },
-    '100%'  : {
-        'background'    : 'green'
-    }
-})
-/**/
 /**
 dom('#dom')({
     'animation' : 'myanim 5s'
