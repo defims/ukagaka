@@ -676,47 +676,60 @@ keyframes.myanim = {
 //new
 //
 
-var Vector3 = function(x,y,z){
+var Vector3 = function(x,y,z,matrixs){
     this.x = x ? x : 0;
     this.y = y ? y : 0;
     this.z = z ? z : 0;
-    this.matrixs    = {};
+    this.matrixs        = [{}];
+
+    if(matrixs) this.matrixs[0] = matrixs;//[0]local matrixs [1..]coordinate System matrixs
 };
 Vector3.prototype   = {
     preMultiply : function(name, matrix){
-        this.matrixs[name] = matrix;
+        this.matrixs[0][name] = matrix;
         return this;
     },
     equal       : function(){
-        var vector = [
-                [this.x],
-                [this.y],
-                [this.z],
-                [1]
-            ],
-            i,j,k,row,val,matrix,
-            matrixs = this.matrixs,
-            result  = [
-                [0],
-                [0],
-                [0],
-                [0]
-            ];
-       
-        for(i in matrixs){
-            matrix  = matrixs[i];
-            for(j=0; j<matrix.length; j++){
-                for(k=0; k<matrix[j].length; k++){
-                    result[j][0] += matrix[j][k] * vector[k];
-                } 
+        var vector = [this.x,this.y,this.z,1],
+            i,j,k,l,row,val,matrix,
+            golbalMatrixs = this.matrixs,
+            result  = [0,0,0,0];
+        for(l=0; l<golbalMatrixs.length; l++){
+            matrixs = golbalMatrixs[l];
+            for(i in matrixs){
+                result  = [0,0,0,0];
+                matrix  = matrixs[i];
+                for(j=0; j<matrix.length; j++){
+                    for(k=0; k<matrix[j].length; k++){
+                        result[j] += matrix[j][k] * vector[k];
+                    }
+                    //console.log(result[j])
+                }
+                vector  = result;
+                //console.log(i+" : "+result.toString());
             }
-            console.log(result.toString());
         };
         return {
-            x   : result[0],
-            y   : result[1],
-            z   : result[2]
+            x   : vector[0],
+            y   : vector[1],
+            z   : vector[2],
+            w   : vector[3]
         };
+    },
+    get    : function(name){
+        switch(name){
+            default : 
+                return this.value[name]; 
+            break;
+        } 
+    },
+    set    : function(name, val){
+        switch(name){
+            default :
+                if(val != undefined) this.value[name] = val;
+                return this.value[name]; 
+            break;
+        }    
     }
 };
 var cos = Math.cos,
@@ -724,22 +737,521 @@ var cos = Math.cos,
     tan = Math.tan,
     PI  = Math.PI;
 
-var vector3 = new Vector3(1,0,0);
+var e   = {//摄像机相对屏幕位置
+        x   : 0,
+        y   : 0,
+        z   : 300 
+    };
+/**/
+//var vector3 = new Vector3(10,10,0);
+/**/
+/**
 vector3.preMultiply('平移',[
-    [1,0,0,0],            
-    [0,1,0,0],            
-    [0,0,1,0],            
-    [0,0,0,1]            
+    [1,0,0,0], 
+    [0,1,0,0], 
+    [0,0,1,0], 
+    [0,0,0,1] 
 ]);
-console.log(vector3.equal());
-vector3.preMultiply('绕x轴旋转',[
+/**/
+/**
+vector3.preMultiply('绕x轴旋转1',[
     [1,0,0,0],            
     [0,cos(PI/2),sin(PI/2),0],            
     [0,-sin(PI/2),cos(PI/2),0],            
     [0,0,0,1]            
 ]);
+/**/
+/**
+vector3.preMultiply('绕x轴旋转2',[
+    [1,0,0,0],            
+    [0,cos(-PI/2),sin(-PI/2),0],            
+    [0,-sin(-PI/2),cos(-PI/2),0],            
+    [0,0,0,1]            
+]);
+/**
+vector3.preMultiply('投影二维',[
+    [1,0,0,-e.x],            
+    [0,1,0,-e.y],            
+    [0,0,1,0],            
+    [0,0,1/e.z,1]            
+]);
+/**/
+/**
+var x0 = 10,
+    y0 = 0,
+    z0 = 0,
+    ux = 0,
+    uy = 1,
+    uz = 0,
+    vx = 1,
+    vy = 0,
+    vz = 0,
+    nx = 0,
+    ny = 0,
+    nz = 1;
 
-console.log(vector3.equal());
-console.log(vector3);
+/*vector3.preMultiply('坐标变换1',[
+    [1,0,0,-x0],            
+    [0,1,0,-y0],            
+    [0,0,1,-z0],            
+    [0,0,0,1]            
+]);
+vector3.preMultiply('坐标变换2',[
+    [ux,uy,uz,0],            
+    [vx,vy,vz,0],            
+    [nx,ny,nz,0],            
+    [0,0,0,1]            
+]);
+*/
+/*
+vector3.preMultiply('坐标变换',[
+    [ux,uy,uz,-ux*x0-uy*y0-uz*z0],            
+    [vx,vy,vz,-vx*x0-vy*y0-vz*z0],            
+    [nx,ny,nz,-nx*x0-ny*y0-nz*z0], 
+    [0,0,0,1]            
+]);
+*/
+/**/
+//console.log(vector3.equal());
+
+ 
+
+
+
+
+/*var matrixs = {
+        '绕x轴旋转':[
+            [1, 0, 0, 0],
+            [0, cos(0), -sin(0), 0],
+            [0, sin(0), cos(0), 0],
+            [0, 0, 0, 1],
+        ],
+        '三维投影二维':[
+            [1, 0, 0, -e.x],
+            [0, 1, 0, -e.y],
+            [0, 0, 1, 0],
+            [0, 0, 1/e.z, 1],
+        ]
+    },
+    vector3s    = [],
+    vector3,
+    result,
+    x,
+    y,
+    scale,
+    ctx         = canvas.getContext('2d');
+console.log(matrixs);
+*/
+/**
+for(var i = 0; i< 1000; i++ ){
+    vector3 = new Vector3(
+        Math.random() * canvas.width - canvas.width/2,
+        Math.random() * canvas.height - canvas.height/2,
+        Math.random() * 100,
+        matrixs
+    );
+    vector3s.push(vector3);
+};
+/**/
+/**
+vector3s.push(new Vector3( 20, 20, 20, matrixs));
+vector3s.push(new Vector3( -20, 20, 20, matrixs));
+vector3s.push(new Vector3( -20, -20, 20, matrixs));
+vector3s.push(new Vector3( 20, -20, 20, matrixs))
+vector3s.push(new Vector3( 20, 20, -20, matrixs));
+vector3s.push(new Vector3( -20, 20, -20, matrixs));
+vector3s.push(new Vector3( -20, -20, -20, matrixs));
+vector3s.push(new Vector3( 20, -20, -20, matrixs));
+/**/
+var CoordinateSystem    = function(axis,geometries, matrixs){
+    this.geometries     = {};
+    this.vector3s       = [];
+    this.matrixs        = matrixs? matrixs : {};
+    if(axis.origin) this.origin     = axis.origin;
+    if(axis.xAxis)  this.xAxis      = axis.xAxis;
+    if(axis.yAxis)  this.yAxis      = axis.yAxis;
+    if(axis.zAxis)  this.zAxis      = axis.zAxis;
+    if(axis.coordinateSystem)   this.coordinateSystem   = axis.coordinateSystem;
+
+    //axis
+    var vector3,
+        coordinateSystem = this.coordinateSystem;
+        
+    while(coordinateSystem){
+        var o   = coordinateSystem.origin,
+            u   = coordinateSystem.xAxis,
+            v   = coordinateSystem.yAxis,
+            n   = coordinateSystem.zAxis;
+
+        this.matrixs['0坐标系变换矩阵'] = [
+            [u[0],u[1],u[2],-u[0]*o[0]-u[1]*o[1]-u[2]*o[2]],            
+            [v[0],v[1],v[2],-v[0]*o[0]-v[1]*o[1]-v[2]*o[2]],            
+            [n[0],n[1],n[2],-n[0]*o[0]-n[1]*o[1]-n[2]*o[2]], 
+            [0,0,0,1]            
+        ];
+        coordinateSystem = coordinateSystem.coordinateSystem;
+    }
+    if(geometries.points) this.addPoints(geometries.points);
+    if(geometries.lines) this.addLines(geometries.lines);
+    if(geometries.curves) this.addCurves(geometries.curves);
+    if(u && v && n) this.addArrows([[o,u],[o,v],[o,n]]);
+
+}
+CoordinateSystem.prototype  = {
+    addPoints   : function(points){//points
+        if(!points) return;
+        var point,vector3;
+        for(var i = 0; i<points.length; i++){
+            point   = points[i];
+            vector3  = new Vector3(point[0],point[1],point[2]);
+            vector3.matrixs.push( this.matrixs );
+            this.vector3s.push( vector3 );
+            if(!this.geometries.points){
+                this.geometries.points = [];
+            }
+            this.geometries.points.push(vector3);
+        }
+    },
+    addLines    : function(lines){//lines
+        if(!lines) return;
+        var line,
+            point1,
+            point2,
+            vector31,
+            vector32;
+        for(var i = 0; i<lines.length; i++){
+            line    = lines[i];
+            point1  = line[0];
+            point2  = line[1];
+            vector31 = new Vector3(point1[0],point1[1],point1[2]);
+            vector32 = new Vector3(point2[0],point2[1],point2[2]);
+            vector31.matrixs.push( this.matrixs );
+            vector32.matrixs.push( this.matrixs );
+            this.vector3s.push( vector31 );
+            this.vector3s.push( vector32 );
+            if(!this.geometries.lines){
+                this.geometries.lines = [];
+            }
+            this.geometries.lines.push([vector31,vector32]);
+        };
+    },
+    addCurves   : function(curves){//curves
+        if(!curves) return;
+        var curve,
+            point1,
+            point2,
+            point3,
+            point4,
+            vector31,
+            vector32,
+            vector33,
+            vector34;
+        for(var i = 0; i<curves.length; i++){
+            curve   = curves[i];
+            point1  = curve[0];
+            point2  = curve[1];
+            point3  = curve[2];
+            point4  = curve[3];
+            vector31 = new Vector3(point1[0],point1[1],point1[2]);
+            vector32 = new Vector3(point2[0],point2[1],point2[2]);
+            vector33 = new Vector3(point3[0],point3[1],point3[2]);
+            vector34 = new Vector3(point4[0],point4[1],point4[2]);
+            vector31.matrixs.push( this.matrixs );
+            vector32.matrixs.push( this.matrixs );
+            vector33.matrixs.push( this.matrixs );
+            vector34.matrixs.push( this.matrixs );
+            this.vector3s.push( vector31 );
+            this.vector3s.push( vector32 );
+            this.vector3s.push( vector33 );
+            this.vector3s.push( vector34 );
+            if(!this.geometries.curves){
+                this.geometries.curves = [];
+            }
+            this.geometries.curves.push([vector31,vector32,vector33,vector34]);
+        };
+    },
+    addArrows   : function(arrows){//arrows
+        if(!arrows) return;
+        var arrow,
+            point1,
+            point2,
+            vector31,
+            vector32;
+        console.log(arrows)
+        for(var i = 0; i<arrows.length; i++){
+            arrow   = arrows[i];
+            point1  = arrow[0];
+            point2  = arrow[1];
+            vector31 = new Vector3(point1[0],point1[1],point1[2]);
+            vector32 = new Vector3(point2[0],point2[1],point2[2]);
+            vector31.matrixs.push( this.matrixs );
+            vector32.matrixs.push( this.matrixs );
+            this.vector3s.push( vector31 );
+            this.vector3s.push( vector32 );
+            if(!this.geometries.arrows){
+                this.geometries.arrows = [];
+            }
+            this.geometries.arrows.push([vector31,vector32]);
+        };
+    }
+};
+var world               = new CoordinateSystem({
+    'origin': [0,0,0],
+    'xAxis' : [1,0,0],
+    'yAxis' : [0,1,0],
+    'zAxis' : [0,0,1]
+},{
+},{
+
+});
+var coordinateSystem    = new CoordinateSystem({
+    'origin': [0,0,0],
+    'xAxis' : [1,0,0],
+    'yAxis' : [0,1,0],
+    'zAxis' : [0,0,1],
+    'coordinateSystem' : world
+},{
+    'points':[
+        [20,20,20],
+        [-20,20,20],
+        [-20,-20,20],
+        [20,-20,20],
+        [20,20,-20],
+        [-20,20,-20],
+        [-20,-20,-20],
+        [20,-20,-20]
+    ],
+    'lines':[
+        [[0,0,0],[20,0,0]],  
+        [[0,0,0],[0,30,0]],
+        [[0,0,0],[0,0,10]]  
+    ],
+    'curves':[
+        [[0,0,0],[1,1,1],[10,10,10],[50,50,50]],
+        [[0,0,0],[1,1,1],[10,10,10],[0,0,0]] 
+    ],
+    'arrows':[
+        [[0,0,0],[1,1,1],3,3] 
+    ]
+},{
+    '1绕x轴旋转矩阵':[
+        [1, 0, 0, 0],
+        [0, cos(0), -sin(0), 0],
+        [0, sin(0), cos(0), 0],
+        [0, 0, 0, 1],
+    ],
+    '2绕y轴旋转矩阵':[
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+    ],
+    '3绕z轴旋转矩阵':[
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+    ] 
+});
+console.log(coordinateSystem)
+/**/
+
+//vector3s.push(new Vector3( 20, 20, 20, matrixs));
+var phi         = 0,
+    canvas      = document.createElement('canvas'),
+    ctx         = canvas.getContext('2d'),
+    vector3s    = coordinateSystem.vector3s,
+    geometries  = coordinateSystem.geometries,
+    o           = [0,0,0],
+    u           = [0,1,0],
+    v           = [1,0,0],
+    n           = [0,0,1];
+
+
+canvas.width    = 500; 
+canvas.height   = 500;
+canvas.style.width  = '500px';
+canvas.style.height = '500px';
+document.body.appendChild(canvas);
+
+setInterval(function(){
+    phi += PI/50;
+    coordinateSystem.matrixs['1绕x轴旋转'] = [
+        [1, 0, 0, 0],
+        [0, cos(phi), -sin(phi), 0],
+        [0, sin(phi), cos(phi), 0],
+        [0, 0, 0, 1],
+    ];
+
+    coordinateSystem.matrixs['2三维投影二维'] = [
+        [1, 0, 0, -e.x],
+        [0, 1, 0, -e.y],
+        [0, 0, 1, 0],
+        [0, 0, 1/e.z, 1],
+    ];
+    ctx.clearRect(0,0,canvas.width,canvas.height); 
+    ctx.beginPath();
+    var offsetX   = canvas.width/2, 
+        offsetY   = canvas.height/2;
+
+    //points
+    var points   = geometries.points;
+    if(points.length != 0){
+        for(var i = 0; i<points.length; i++){
+            var point   = points[i], 
+                result  = point.equal(),
+                x       = result.x/result.w + offsetX,
+                y       = result.y/result.w + offsetY;
+            ctx.moveTo(x,y);
+            ctx.arc(
+                x,
+                y,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fill();
+        };
+    }
+    //lines
+    var lines   = geometries.lines;
+    ctx.fillStyle   = 'rgb(0,0,0)';
+    ctx.strokeStyle   = 'rgb(0,0,0)';
+    if(lines && lines.length != 0){
+        for(var i = 0; i<lines.length; i++){
+            var line    = lines[i], 
+                point1  = line[0], 
+                point2  = line[1], 
+                result1 = point1.equal(),
+                result2 = point2.equal(),
+                x1      = result1.x/result1.w + offsetX,
+                x2      = result2.x/result2.w + offsetX,
+                y1      = result1.y/result1.w + offsetY;
+                y2      = result2.y/result2.w + offsetY;
+
+            ctx.moveTo(x1,y1);
+            ctx.arc(
+                x1,
+                y1,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fill();
+            ctx.moveTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.stroke();
+            ctx.arc(
+                x2,
+                y2,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fill();
+        };
+    };
+    //curves
+    var curves   = geometries.curves;
+    ctx.fillStyle   = 'rgb(0,0,0)';
+    ctx.strokeStyle   = 'rgb(0,0,0)';
+    if(curves && curves.length != 0){
+        for(var i = 0; i<curves.length; i++){
+            var curve   = curves[i], 
+                point1  = curve[0], 
+                point2  = curve[1], 
+                point3  = curve[2], 
+                point4  = curve[3], 
+                result1 = point1.equal(),
+                result2 = point2.equal(),
+                result3 = point3.equal(),
+                result4 = point4.equal(),
+                x1      = result1.x/result1.w + offsetX,
+                x2      = result2.x/result2.w + offsetX,
+                x3      = result3.x/result3.w + offsetX,
+                x4      = result3.x/result2.w + offsetX,
+                y1      = result1.y/result1.w + offsetY;
+                y2      = result2.y/result2.w + offsetY;
+                y3      = result3.y/result3.w + offsetY;
+                y4      = result4.y/result4.w + offsetY;
+
+            ctx.moveTo(x1,y1);
+            ctx.arc(
+                x1,
+                y1,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fill();
+            ctx.moveTo(x1,y1);
+            ctx.bezierCurveTo(
+                x2,      
+                y2,            
+                x3,            
+                y3,            
+                x4,        
+                y4 
+            );
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x4,y4);
+            ctx.arc(
+                x4,
+                y4,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fill();
+        };
+    };
+    //arrows
+    var arrows   = geometries.arrows;
+    if(arrows && arrows.length != 0){
+        for(var i = 0; i<arrows.length; i++){
+            var arrow   = arrows[i], 
+                point1  = arrow[0], 
+                point2  = arrow[1], 
+                result1 = point1.equal(),
+                result2 = point2.equal(),
+                x1      = result1.x/result1.w + offsetX,
+                x2      = result2.x/result2.w + offsetX,
+                y1      = result1.y/result1.w + offsetY;
+                y2      = result2.y/result2.w + offsetY;
+
+            ctx.moveTo(x1,y1);
+            ctx.arc(
+                x1,
+                y1,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fillStyle   = 'rgb(255,0,0)';
+            ctx.fill();
+            ctx.moveTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.strokeStyle   = 'rgb(255,0,0)';
+            ctx.stroke();
+            ctx.arc(
+                x2,
+                y2,
+                1,
+                0,
+                2 * Math.PI,
+                false
+            );
+            ctx.fill();
+        };
+    };
+}, 50);
+
 
 });
