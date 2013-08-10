@@ -873,14 +873,14 @@ var CoordinateSystem    = function(axis,geometries, matrixs){
     if(axis.yAxis)  this.yAxis      = axis.yAxis;
     if(axis.zAxis)  this.zAxis      = axis.zAxis;
     if(axis.coordinateSystem)   this.coordinateSystem   = axis.coordinateSystem;
-    console.log(axis)
+    //console.log(axis)
     //axis
     var vector3,
         o   = axis.origin,
         u   = axis.xAxis,
         v   = axis.yAxis,
         n   = axis.zAxis;
-    console.log(o,u,v,n)
+    //console.log(o,u,v,n)
         
     this.matrixs['坐标系变换矩阵1'] = [
         [1,0,0,o[0]],            
@@ -1017,8 +1017,27 @@ CoordinateSystem.prototype  = {
             }
             this.geometries.arrows.push([vector31,vector32]);
         };
-    }
+    }/*,
+    addOval   : function(ovals){//ovals
+        if(!ovals) return;
+        var oval,vector3,coordinateSystem;
+        for(var i = 0; i<ovals.length; i++){
+            oval   = ovals[i];
+            vector3  = new Vector3(oval[0],oval[1],oval[2]);
+            coordinateSystem   = this; 
+            while(coordinateSystem){
+                vector3.matrixs.push( coordinateSystem.matrixs );
+                coordinateSystem = coordinateSystem.coordinateSystem;
+            }
+            this.vector3s.push( vector3 );
+            if(!this.geometries.ovals){
+                this.geometries.ovals = [];
+            }
+            this.geometries.ovals.push([vector3,oval[3],oval[4]]);
+        }
+    }*/
 };
+/*
 var world               = new CoordinateSystem({
     'origin': [0,0,0],
     'xAxis' : [100,0,0],
@@ -1048,21 +1067,21 @@ var coordinateSystem    = new CoordinateSystem({
         [0,0,100]
     ],
     'lines':[
-      /*  [[0,0,0],[20,0,0]],  
+        [[0,0,0],[20,0,0]],  
         [[0,0,0],[0,30,0]],
         [[0,0,0],[0,0,10]]  
-        */
+        
     ],
     'curves':[
-        /*[[0,0,0],[60,0,0],[0,60,0],[50,50,50]],
+        [[0,0,0],[60,0,0],[0,60,0],[50,50,50]],
         [[0,0,0],[1,1,1],[10,10,10],[0,0,0]] 
-        */
+        
     ],
     'arrows':[
         [[0,0,0],[1,1,1],3,3] 
     ]
 },{
-   /* '绕x轴旋转':[
+    '绕x轴旋转':[
         [1, 0, 0, 0],
         [0, cos(0), -sin(0), 0],
         [0, sin(0), cos(0), 0],
@@ -1080,7 +1099,6 @@ var coordinateSystem    = new CoordinateSystem({
         [0, 0, 1, 0],
         [0, 0, 0, 1],
     ] 
-    */
 });
 
 var coordinateSystem2    = new CoordinateSystem({
@@ -1105,8 +1123,34 @@ var coordinateSystem2    = new CoordinateSystem({
 });
 
 console.log(coordinateSystem)
+*/
 /**/
+//肢体
+var Limb    = CoordinateSystem;
+var body    = new Limb({
+    'origin': [0,0,0],
+    'xAxis' : [1,0,0],
+    'yAxis' : [0,1,0],
+    'zAxis' : [0,0,1]
+},{
+    'points':[
+        [20,20,20],
+        [-20,20,20],
+        [-20,-20,20],
+        [20,-20,20],
+        [20,20,-20],
+        [-20,20,-20],
+        [-20,-20,-20],
+        [20,-20,-20],
+        [0,0,100]
+    ],
+    'curves':[
+        [[0,50,0],[50,50,0],[20,-50,0],[0,-50,0]], 
+        [[0,-50,0],[-20,-50,0],[-50,50,0],[0,50,0]], 
+    ]
+},{
 
+});
 //vector3s.push(new Vector3( 20, 20, 20, matrixs));
 /**/
 var phi         = 0,
@@ -1122,14 +1166,14 @@ document.body.appendChild(canvas);
 
 setInterval(function(){
     phi += PI/50;
-    world.matrixs['绕x轴旋转'] = [
+    body.matrixs['绕x轴旋转'] = [
         [1, 0, 0, 0],
         [0, cos(phi), -sin(phi), 0],
         [0, sin(phi), cos(phi), 0],
         [0, 0, 0, 1],
     ];
     
-    var coord   = coordinateSystem2; 
+    var coord   = body; 
 
     ctx.clearRect(0,0,canvas.width,canvas.height); 
     while(coord){
@@ -1313,5 +1357,35 @@ setInterval(function(){
                 ctx.fill();
             };
         };
+        /*
+        //ovals
+        var ovals   = geometries.ovals;
+        if(ovals && ovals.length != 0){
+            ctx.strokeStyle = 'rgb(0,0,0)';
+            ctx.fillStyle   = 'rgb(0,0,0)';
+            for(var i = 0; i<ovals.length; i++){
+                var oval    = ovals[i], 
+                    result  = oval[0].equal(),
+                    scale   = result.z/e.z + 1,
+                    x       = (result.x - e.x)/scale + offsetX,
+                    y       = (result.y - e.y)/scale + offsetY,
+                    a       = oval[1],
+                    b       = oval[2],
+                    ox      = .5*a,
+                    oy      = .6*b;
+
+                ctx.moveTo(x,y);
+                ctx.arc(
+                    x,
+                    y,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+            };
+        }
+        */
     };
 });
