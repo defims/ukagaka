@@ -36,7 +36,8 @@ require(['ukaDirectives',''],function(ukaDirectives,vector3){
                     switch(name){
                         case 'x': 
                             return 0;
-                        break;
+                        break; 
+
                         case 'y': 
                             return -1;
                         break;
@@ -680,7 +681,7 @@ var Vector3 = function(x,y,z,matrixs){
     this.x = x ? x : 0;
     this.y = y ? y : 0;
     this.z = z ? z : 0;
-    this.matrixs        = [{}];
+    this.matrixs        = [{}];//[{本地变换},{坐标系变换},...,{坐标系变换}]
 
     if(matrixs) this.matrixs[0] = matrixs;//[0]local matrixs [1..]coordinate System matrixs
 };
@@ -866,45 +867,54 @@ vector3s.push(new Vector3( 20, -20, -20, matrixs));
 var CoordinateSystem    = function(axis,geometries, matrixs){
     this.geometries     = {};
     this.vector3s       = [];
-    this.matrixs        = matrixs? matrixs : {};
+    this.matrixs        = matrixs? matrixs : {};//{'0坐标系变换矩阵':..,'旋转矩阵':..}
     if(axis.origin) this.origin     = axis.origin;
     if(axis.xAxis)  this.xAxis      = axis.xAxis;
     if(axis.yAxis)  this.yAxis      = axis.yAxis;
     if(axis.zAxis)  this.zAxis      = axis.zAxis;
     if(axis.coordinateSystem)   this.coordinateSystem   = axis.coordinateSystem;
-
+    console.log(axis)
     //axis
     var vector3,
-        coordinateSystem = this.coordinateSystem;
+        o   = axis.origin,
+        u   = axis.xAxis,
+        v   = axis.yAxis,
+        n   = axis.zAxis;
+    console.log(o,u,v,n)
         
-    while(coordinateSystem){
-        var o   = coordinateSystem.origin,
-            u   = coordinateSystem.xAxis,
-            v   = coordinateSystem.yAxis,
-            n   = coordinateSystem.zAxis;
+    this.matrixs['坐标系变换矩阵1'] = [
+        [1,0,0,o[0]],            
+        [0,1,0,o[1]],            
+        [0,0,1,o[2]], 
+        [0,0,0,1]            
+    ];
+    
+    /*this.matrixs['坐标系变换矩阵2'] = [
+        [u[0],u[1],u[2],-u[0]*o[0]-u[1]*o[1]-u[2]*o[2]],            
+        [v[0],v[1],v[2],-v[0]*o[0]-v[1]*o[1]-v[2]*o[2]],            
+        [n[0],n[1],n[2],-n[0]*o[0]-n[1]*o[1]-n[2]*o[2]], 
+        [0,0,0,1]            
+    ];*/
 
-        this.matrixs['0坐标系变换矩阵'] = [
-            [u[0],u[1],u[2],-u[0]*o[0]-u[1]*o[1]-u[2]*o[2]],            
-            [v[0],v[1],v[2],-v[0]*o[0]-v[1]*o[1]-v[2]*o[2]],            
-            [n[0],n[1],n[2],-n[0]*o[0]-n[1]*o[1]-n[2]*o[2]], 
-            [0,0,0,1]            
-        ];
-        coordinateSystem = coordinateSystem.coordinateSystem;
-    }
+
     if(geometries.points) this.addPoints(geometries.points);
     if(geometries.lines) this.addLines(geometries.lines);
     if(geometries.curves) this.addCurves(geometries.curves);
-    if(u && v && n) this.addArrows([[o,u],[o,v],[o,n]]);
+    if(u && v && n) this.addArrows([[[0,0,0],[10,0,0],3,3],[[0,0,0],[0,10,0],3,3],[[0,0,0],[0,0,10],3,3]]);
 
 }
 CoordinateSystem.prototype  = {
     addPoints   : function(points){//points
         if(!points) return;
-        var point,vector3;
+        var point,vector3,coordinateSystem;
         for(var i = 0; i<points.length; i++){
             point   = points[i];
             vector3  = new Vector3(point[0],point[1],point[2]);
-            vector3.matrixs.push( this.matrixs );
+            coordinateSystem   = this; 
+            while(coordinateSystem){
+                vector3.matrixs.push( coordinateSystem.matrixs );
+                coordinateSystem = coordinateSystem.coordinateSystem;
+            }
             this.vector3s.push( vector3 );
             if(!this.geometries.points){
                 this.geometries.points = [];
@@ -918,15 +928,20 @@ CoordinateSystem.prototype  = {
             point1,
             point2,
             vector31,
-            vector32;
+            vector32,
+            coordinateSystem;
         for(var i = 0; i<lines.length; i++){
             line    = lines[i];
             point1  = line[0];
             point2  = line[1];
             vector31 = new Vector3(point1[0],point1[1],point1[2]);
             vector32 = new Vector3(point2[0],point2[1],point2[2]);
-            vector31.matrixs.push( this.matrixs );
-            vector32.matrixs.push( this.matrixs );
+            coordinateSystem   = this; 
+            while(coordinateSystem){
+                vector31.matrixs.push( coordinateSystem.matrixs );
+                vector32.matrixs.push( coordinateSystem.matrixs );
+                coordinateSystem = coordinateSystem.coordinateSystem;
+            }
             this.vector3s.push( vector31 );
             this.vector3s.push( vector32 );
             if(!this.geometries.lines){
@@ -945,7 +960,8 @@ CoordinateSystem.prototype  = {
             vector31,
             vector32,
             vector33,
-            vector34;
+            vector34,
+            coordinateSystem;
         for(var i = 0; i<curves.length; i++){
             curve   = curves[i];
             point1  = curve[0];
@@ -956,10 +972,14 @@ CoordinateSystem.prototype  = {
             vector32 = new Vector3(point2[0],point2[1],point2[2]);
             vector33 = new Vector3(point3[0],point3[1],point3[2]);
             vector34 = new Vector3(point4[0],point4[1],point4[2]);
-            vector31.matrixs.push( this.matrixs );
-            vector32.matrixs.push( this.matrixs );
-            vector33.matrixs.push( this.matrixs );
-            vector34.matrixs.push( this.matrixs );
+            coordinateSystem   = this; 
+            while(coordinateSystem){
+                vector31.matrixs.push( coordinateSystem.matrixs );
+                vector32.matrixs.push( coordinateSystem.matrixs );
+                vector33.matrixs.push( coordinateSystem.matrixs );
+                vector34.matrixs.push( coordinateSystem.matrixs );
+                coordinateSystem = coordinateSystem.coordinateSystem;
+            }
             this.vector3s.push( vector31 );
             this.vector3s.push( vector32 );
             this.vector3s.push( vector33 );
@@ -976,16 +996,20 @@ CoordinateSystem.prototype  = {
             point1,
             point2,
             vector31,
-            vector32;
-        console.log(arrows)
+            vector32,
+            coordinateSystem;
         for(var i = 0; i<arrows.length; i++){
-            arrow   = arrows[i];
+            arrow    = arrows[i];
             point1  = arrow[0];
             point2  = arrow[1];
             vector31 = new Vector3(point1[0],point1[1],point1[2]);
             vector32 = new Vector3(point2[0],point2[1],point2[2]);
-            vector31.matrixs.push( this.matrixs );
-            vector32.matrixs.push( this.matrixs );
+            coordinateSystem   = this; 
+            while(coordinateSystem){
+                vector31.matrixs.push( coordinateSystem.matrixs );
+                vector32.matrixs.push( coordinateSystem.matrixs );
+                coordinateSystem = coordinateSystem.coordinateSystem;
+            }
             this.vector3s.push( vector31 );
             this.vector3s.push( vector32 );
             if(!this.geometries.arrows){
@@ -997,18 +1021,19 @@ CoordinateSystem.prototype  = {
 };
 var world               = new CoordinateSystem({
     'origin': [0,0,0],
-    'xAxis' : [1,0,0],
-    'yAxis' : [0,1,0],
-    'zAxis' : [0,0,1]
+    'xAxis' : [100,0,0],
+    'yAxis' : [0,100,0],
+    'zAxis' : [0,0,100]
 },{
 },{
 
 });
+
 var coordinateSystem    = new CoordinateSystem({
-    'origin': [0,0,0],
-    'xAxis' : [1,0,0],
-    'yAxis' : [0,1,0],
-    'zAxis' : [0,0,1],
+    'origin': [50,50,0],
+    'xAxis' : [100,50,0],
+    'yAxis' : [50,100,0],
+    'zAxis' : [50,50,50],
     'coordinateSystem' : world
 },{
     'points':[
@@ -1019,53 +1044,74 @@ var coordinateSystem    = new CoordinateSystem({
         [20,20,-20],
         [-20,20,-20],
         [-20,-20,-20],
-        [20,-20,-20]
+        [20,-20,-20],
+        [0,0,100]
     ],
     'lines':[
-        [[0,0,0],[20,0,0]],  
+      /*  [[0,0,0],[20,0,0]],  
         [[0,0,0],[0,30,0]],
         [[0,0,0],[0,0,10]]  
+        */
     ],
     'curves':[
-        [[0,0,0],[1,1,1],[10,10,10],[50,50,50]],
+        /*[[0,0,0],[60,0,0],[0,60,0],[50,50,50]],
         [[0,0,0],[1,1,1],[10,10,10],[0,0,0]] 
+        */
     ],
     'arrows':[
         [[0,0,0],[1,1,1],3,3] 
     ]
 },{
-    '1绕x轴旋转矩阵':[
+   /* '绕x轴旋转':[
         [1, 0, 0, 0],
         [0, cos(0), -sin(0), 0],
         [0, sin(0), cos(0), 0],
         [0, 0, 0, 1],
     ],
-    '2绕y轴旋转矩阵':[
+    '绕y轴旋转':[
         [1, 0, 0, 0],
         [0, 1, 0, 0],
         [0, 0, 1, 0],
         [0, 0, 0, 1],
     ],
-    '3绕z轴旋转矩阵':[
+    '绕z轴旋转':[
         [1, 0, 0, 0],
         [0, 1, 0, 0],
         [0, 0, 1, 0],
         [0, 0, 0, 1],
     ] 
+    */
 });
+
+var coordinateSystem2    = new CoordinateSystem({
+    'origin': [50,50,0],
+    'xAxis' : [100,50,0],
+    'yAxis' : [50,100,0],
+    'zAxis' : [50,50,50],
+    'coordinateSystem' :coordinateSystem 
+},{
+    'points':[
+        [20,20,20],
+        [-20,20,20],
+        [-20,-20,20],
+        [20,-20,20],
+        [20,20,-20],
+        [-20,20,-20],
+        [-20,-20,-20],
+        [20,-20,-20],
+        [0,0,100]
+    ]
+},{
+});
+
 console.log(coordinateSystem)
 /**/
 
 //vector3s.push(new Vector3( 20, 20, 20, matrixs));
+/**/
 var phi         = 0,
     canvas      = document.createElement('canvas'),
-    ctx         = canvas.getContext('2d'),
-    vector3s    = coordinateSystem.vector3s,
-    geometries  = coordinateSystem.geometries,
-    o           = [0,0,0],
-    u           = [0,1,0],
-    v           = [1,0,0],
-    n           = [0,0,1];
+    ctx         = canvas.getContext('2d');
 
 
 canvas.width    = 500; 
@@ -1076,182 +1122,196 @@ document.body.appendChild(canvas);
 
 setInterval(function(){
     phi += PI/50;
-    coordinateSystem.matrixs['1绕x轴旋转'] = [
+    world.matrixs['绕x轴旋转'] = [
         [1, 0, 0, 0],
         [0, cos(phi), -sin(phi), 0],
         [0, sin(phi), cos(phi), 0],
         [0, 0, 0, 1],
     ];
+    
+    var coord   = coordinateSystem2; 
 
-    coordinateSystem.matrixs['2三维投影二维'] = [
-        [1, 0, 0, -e.x],
-        [0, 1, 0, -e.y],
-        [0, 0, 1, 0],
-        [0, 0, 1/e.z, 1],
-    ];
     ctx.clearRect(0,0,canvas.width,canvas.height); 
-    ctx.beginPath();
-    var offsetX   = canvas.width/2, 
-        offsetY   = canvas.height/2;
-
-    //points
-    var points   = geometries.points;
-    if(points.length != 0){
-        for(var i = 0; i<points.length; i++){
-            var point   = points[i], 
-                result  = point.equal(),
-                x       = result.x/result.w + offsetX,
-                y       = result.y/result.w + offsetY;
-            ctx.moveTo(x,y);
-            ctx.arc(
-                x,
-                y,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fill();
-        };
+    while(coord){
+        drawGeometries(coord.geometries);
+        coord = coord.coordinateSystem;
     }
-    //lines
-    var lines   = geometries.lines;
-    ctx.fillStyle   = 'rgb(0,0,0)';
-    ctx.strokeStyle   = 'rgb(0,0,0)';
-    if(lines && lines.length != 0){
-        for(var i = 0; i<lines.length; i++){
-            var line    = lines[i], 
-                point1  = line[0], 
-                point2  = line[1], 
-                result1 = point1.equal(),
-                result2 = point2.equal(),
-                x1      = result1.x/result1.w + offsetX,
-                x2      = result2.x/result2.w + offsetX,
-                y1      = result1.y/result1.w + offsetY;
-                y2      = result2.y/result2.w + offsetY;
-
-            ctx.moveTo(x1,y1);
-            ctx.arc(
-                x1,
-                y1,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fill();
-            ctx.moveTo(x1,y1);
-            ctx.lineTo(x2,y2);
-            ctx.stroke();
-            ctx.arc(
-                x2,
-                y2,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fill();
-        };
-    };
-    //curves
-    var curves   = geometries.curves;
-    ctx.fillStyle   = 'rgb(0,0,0)';
-    ctx.strokeStyle   = 'rgb(0,0,0)';
-    if(curves && curves.length != 0){
-        for(var i = 0; i<curves.length; i++){
-            var curve   = curves[i], 
-                point1  = curve[0], 
-                point2  = curve[1], 
-                point3  = curve[2], 
-                point4  = curve[3], 
-                result1 = point1.equal(),
-                result2 = point2.equal(),
-                result3 = point3.equal(),
-                result4 = point4.equal(),
-                x1      = result1.x/result1.w + offsetX,
-                x2      = result2.x/result2.w + offsetX,
-                x3      = result3.x/result3.w + offsetX,
-                x4      = result3.x/result2.w + offsetX,
-                y1      = result1.y/result1.w + offsetY;
-                y2      = result2.y/result2.w + offsetY;
-                y3      = result3.y/result3.w + offsetY;
-                y4      = result4.y/result4.w + offsetY;
-
-            ctx.moveTo(x1,y1);
-            ctx.arc(
-                x1,
-                y1,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fill();
-            ctx.moveTo(x1,y1);
-            ctx.bezierCurveTo(
-                x2,      
-                y2,            
-                x3,            
-                y3,            
-                x4,        
-                y4 
-            );
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x4,y4);
-            ctx.arc(
-                x4,
-                y4,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fill();
-        };
-    };
-    //arrows
-    var arrows   = geometries.arrows;
-    if(arrows && arrows.length != 0){
-        for(var i = 0; i<arrows.length; i++){
-            var arrow   = arrows[i], 
-                point1  = arrow[0], 
-                point2  = arrow[1], 
-                result1 = point1.equal(),
-                result2 = point2.equal(),
-                x1      = result1.x/result1.w + offsetX,
-                x2      = result2.x/result2.w + offsetX,
-                y1      = result1.y/result1.w + offsetY;
-                y2      = result2.y/result2.w + offsetY;
-
-            ctx.moveTo(x1,y1);
-            ctx.arc(
-                x1,
-                y1,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fillStyle   = 'rgb(255,0,0)';
-            ctx.fill();
-            ctx.moveTo(x1,y1);
-            ctx.lineTo(x2,y2);
-            ctx.strokeStyle   = 'rgb(255,0,0)';
-            ctx.stroke();
-            ctx.arc(
-                x2,
-                y2,
-                1,
-                0,
-                2 * Math.PI,
-                false
-            );
-            ctx.fill();
-        };
-    };
+ 
 }, 50);
+    /**/
 
+   function drawGeometries(geometries){
 
+        ctx.beginPath();
+        var offsetX   = canvas.width/2, 
+            offsetY   = canvas.height/2;
+
+        //points
+        var points   = geometries.points;
+        if(points && points.length != 0){
+            ctx.strokeStyle = 'rgb(0,0,0)';
+            ctx.fillStyle   = 'rgb(0,0,0)';
+            for(var i = 0; i<points.length; i++){
+                var point   = points[i], 
+                    result  = point.equal(),
+                    scale   = result.z/e.z + 1,
+                    x       = (result.x - e.x)/scale + offsetX,
+                    y       = (result.y - e.y)/scale + offsetY;
+                ctx.moveTo(x,y);
+                ctx.arc(
+                    x,
+                    y,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+            };
+        }
+        //lines
+        var lines   = geometries.lines;
+        if(lines && lines.length != 0){
+            ctx.beginPath();
+            ctx.fillStyle   = 'rgb(0,0,0)';
+            ctx.strokeStyle   = 'rgb(0,0,0)';
+            for(var i = 0; i<lines.length; i++){
+                var line    = lines[i], 
+                    point1  = line[0], 
+                    point2  = line[1], 
+                    result1 = point1.equal(),
+                    result2 = point2.equal(),
+                    scale1  = result1.z/e.z + 1,
+                    scale2  = result2.z/e.z + 1,
+                    x1      = (result1.x - e.x)/scale1 + offsetX,
+                    x2      = (result2.x - e.x)/scale2 + offsetX,
+                    y1      = (result1.y - e.y)/scale1 + offsetY,
+                    y2      = (result2.y - e.y)/scale2 + offsetY;
+                ctx.moveTo(x1,y1);
+                ctx.arc(
+                    x1,
+                    y1,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+                ctx.moveTo(x1,y1);
+                ctx.lineTo(x2,y2);
+                ctx.stroke();
+                ctx.arc(
+                    x2,
+                    y2,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+            };
+        };
+        //curves
+        var curves   = geometries.curves;
+        ctx.fillStyle   = 'rgb(0,0,0)';
+        ctx.strokeStyle   = 'rgb(0,0,0)';
+        if(curves && curves.length != 0){
+            for(var i = 0; i<curves.length; i++){
+                var curve   = curves[i], 
+                    point1  = curve[0], 
+                    point2  = curve[1], 
+                    point3  = curve[2], 
+                    point4  = curve[3], 
+                    result1 = point1.equal(),
+                    result2 = point2.equal(),
+                    result3 = point3.equal(),
+                    result4 = point4.equal(),
+                    scale1  = result1.z/e.z + 1,
+                    scale2  = result2.z/e.z + 1,
+                    scale3  = result3.z/e.z + 1,
+                    scale4  = result4.z/e.z + 1,
+                    x1      = (result1.x - e.x)/scale1 + offsetX,
+                    x2      = (result2.x - e.x)/scale2 + offsetX,
+                    x3      = (result3.x - e.x)/scale3 + offsetX,
+                    x4      = (result4.x - e.x)/scale4 + offsetX,
+                    y1      = (result1.y - e.y)/scale1 + offsetY,
+                    y2      = (result2.y - e.y)/scale2 + offsetY,
+                    y3      = (result3.y - e.y)/scale3 + offsetY,
+                    y4      = (result4.y - e.y)/scale4 + offsetY;
+                ctx.moveTo(x1,y1);
+                ctx.arc(
+                    x1,
+                    y1,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+                ctx.moveTo(x1,y1);
+                ctx.bezierCurveTo(
+                    x2,      
+                    y2,            
+                    x3,            
+                    y3,            
+                    x4,        
+                    y4 
+                );
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x4,y4);
+                ctx.arc(
+                    x4,
+                    y4,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+            };
+        };
+        //arrows
+        var arrows   = geometries.arrows;
+        if(arrows && arrows.length != 0){
+            ctx.beginPath();
+            ctx.fillStyle   = 'rgb(255,0,0)';
+            ctx.strokeStyle   = 'rgb(255,0,0)';
+            for(var i = 0; i<arrows.length; i++){
+                var arrow    = arrows[i], 
+                    point1  = arrow[0], 
+                    point2  = arrow[1], 
+                    result1 = point1.equal(),
+                    result2 = point2.equal(),
+                    scale1  = result1.z/e.z + 1,
+                    scale2  = result2.z/e.z + 1,
+                    x1      = (result1.x - e.x)/scale1 + offsetX,
+                    x2      = (result2.x - e.x)/scale2 + offsetX,
+                    y1      = (result1.y - e.y)/scale1 + offsetY,
+                    y2      = (result2.y - e.y)/scale2 + offsetY;
+                ctx.moveTo(x1,y1);
+                ctx.arc(
+                    x1,
+                    y1,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+                ctx.moveTo(x1,y1);
+                ctx.lineTo(x2,y2);
+                ctx.stroke();
+                ctx.arc(
+                    x2,
+                    y2,
+                    1,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                ctx.fill();
+            };
+        };
+    };
 });
