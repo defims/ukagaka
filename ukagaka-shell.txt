@@ -33,6 +33,7 @@ class Geometry {
     +Vector3: [Vector3]
     +visibility: Boolean
     +matrix: Matrix
+    ----
     +drawMe(canvas)
     +addTo(CoordinateSystem)
     --set vector3 CoordinateSystem.matrix--
@@ -51,6 +52,7 @@ class CoordinateSystem{
     +yAxis: [Number, Number, Number]
     +zAxis: [Number, Number, Number]
     +origin: [Number, Number, Number]
+    ----
     +set(xAxis|yAxis|zAxis|origin|matrix, value)
     +add(vector3|geometry)
     --set CoordinateSystem.matrix--
@@ -75,7 +77,9 @@ class Curve{
     +tangents: [Tangent]
     +setTangent(percentage)
     +drawMe(canvas)
-}
+})
+    +rotate(xAngle, yAngle, zAngle)
+
 
 class Line{
     +start: vector3s[0]
@@ -130,7 +134,6 @@ Tangent --|> Line:Extends
 Tangent "1" o--> Line
 Limb ..> CoordinateSystem:Use
 Limb ..> Tangent:Use
-Morph ..> Limb:Use
 Morph "n" o--> Skin
 Skin "n" --> Limb
 
