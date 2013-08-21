@@ -1,10 +1,75 @@
-,----------------------------------------------------------.                                   
-|Vector3                                                   |                                   
-|----------------------------------------------------------|  ,-------------------------------.
-|+x: Number                                                |  |Matrix                         |
-|+y: Number                                                |  |-------------------------------|
-|+z: Number                                                |--|+[[Number,],]                  |
-|+matrixs: [[Geometry.matrix,],[CoordinateSystem.matrix,],]|  |-------------------------------|
-|----------------------------------------------------------|  |+rotate(xAngle, yAngle, zAngle)|
-|+addTo(CoordinateSystem)                                  |  `-------------------------------'
-`----------------------------------------------------------'                                   
+                                                                                       ,---------------.               
+                                                                                       |Morph          |               
+                                                                                       |---------------|               
+                                                                                       |+left: Number  |               
+                                                                                       |+top: Number   |               
+                                                                                       |+width: Number |               
+                                                                                       |+height: Number|               
+                                                                                       |+weight: Number|               
+                                                                                       |---------------|               
+                                                                                       `---------------'               
+                                                                                                                       
+                                                                                                                       
+                   ,-------------------------------.                                     |                             
+                   |Matrix                         |                                     |                             
+                   |-------------------------------|                                     | ,--------------------------.
+                   |+[[Number,],]                  |                                     | |Skin                      |
+                   |-------------------------------|                                     | |--------------------------|
+                   |+rotate(xAngle, yAngle, zAngle)|                                     | |+morphs: {name: Morph,}   |
+                   |+translate(x, y, z)            |                                     | |--------------------------|
+                   |+scale(xScale, yScale, zScale) |                                     | |+func(Limb.matrix) Factory|
+                   |+premultiply(Matrix|Number)    |                                     | `--------------------------'
+                   |+multiply(Matrix|Number)       |                                     |                             
+                   |+add(Matrix)                   |                                     |                             
+                   `-------------------------------'                                     |                             
+                                   |                                                                                   
+    |                              |                                                ,---------------------.            
+    |                              |                                                |Limb                 |            
+    |                              |                                                |---------------------|            
+    |,----------------------------------------------------------.                   |+base: {x, y}        |            
+    ||Vector3                                                   |                   |+angle: Number       |            
+    ||----------------------------------------------------------|                   |+scale: Number       |            
+    ||+x: Number                                                |                   |+zIndex: Number      |            
+    ||+y: Number                                                |                   |+width: Number       |            
+    ||+z: Number                                                |                   |+height: Number      |            
+    ||+matrixs: [[Geometry.matrix,],[CoordinateSystem.matrix,],]|                   |+skin: [Skin]        |            
+    ||----------------------------------------------------------|                   |+matrix: globalMatrix|            
+    ||+addTo(CoordinateSystem)                                  |                   |---------------------|            
+    |`----------------------------------------------------------'                   |+rotate()            |            
+    |                                                                               |+translate()         |            
+    |                                                                               `---------------------'            
+                                                                                                                       
+                                                                                                                       
+                                               ,--------------------------------------------.                          
+                                               |CoordinateSystem                            |                          
+   ,---------------------------------------.   |--------------------------------------------|                          
+   |Geometry                               |   |+parent: CoordinateSystem                   |                          
+   |---------------------------------------|   |+children: [CoordinateSystem]               |                          
+   |+Vector3: [Vector3]                    |   |+matrix: Matrix                             |                          
+   |+visibility: Boolean                   |   |+globalMatrix: Matrix                       |   ,-----------------.    
+   |+matrix: Matrix                        |   |+xAxis: [Number, Number, Number]            |   |Tangent          |    
+   |--set vector3 CoordinateSystem.matrix--|   |+yAxis: [Number, Number, Number]            |   |-----------------|    
+   |---------------------------------------|   |+zAxis: [Number, Number, Number]            |   |+base: Vector3   |    
+   |+drawMe(canvas)                        |   |+origin: [Number, Number, Number]           |   |+vector3: Vector3|    
+   |+addTo(CoordinateSystem)               |   |--set CoordinateSystem.matrix--             |   |-----------------|    
+   |+removeFrom(CoordinateSystem)          |   |--------------------------------------------|   `-----------------'    
+   |+rotate(xAngle, yAngle, zAngle)        |   |+set(xAxis|yAxis|zAxis|origin|matrix, value)|                          
+   |+translate(x, y, z)                    |   |+add(vector3|geometry)                      |                          
+   |+scale(xScale, yScale, zScale)         |   |+remove(vector3|geometry)                   |                          
+   `---------------------------------------'   |+rotate(xAngle, yAngle, zAngle)             |                          
+                        |                      |+translate(x, y, z)                         |                          
+                        |                      |+scale(xScale, yScale, zScale)              |                          
+                        |                      `--------------------------------------------'                          
+                        |                                                                                              
+                        |                          ,-----------------------.                                           
+             ,--------------------.                |Curve                  |                 ,-----------------------. 
+             |Point               |                |-----------------------|                 |Line                   | 
+             |--------------------|                |+start: vector3s[0]    |                 |-----------------------| 
+             |+origin: vector3s[0]|                |+control1: vector3s[1] |                 |+start: vector3s[0]    | 
+             |+radius: Number     |                |+control2: vector3s[2] |                 |+end: vector3s[1]      | 
+             |+color: String      |                |+end: vector3s[3]      |                 |+tangents: [Tangent]   | 
+             |--------------------|                |+tangents: [Tangent]   |                 |-----------------------| 
+             |+drawMe(canvas)     |                |-----------------------|                 |+drawme(canvas)        | 
+             `--------------------'                |+setTangent(percentage)|                 |+setTangent(percentage)| 
+                                                   |+drawMe(canvas)        |                 `-----------------------' 
+                                                   `-----------------------'                                           

@@ -1,9 +1,14 @@
 @startuml
+skinparam backgroundColor transparent
 skinparam class{
     backgroundColor #fef3e3|#e8d7be
     borderColor black
     ArrowColor black
+    fontName    sans-serif
+    fontStyle   bold
 }
+skinparam classAttributeFontName sans-serif
+skinparam classAttributeFontSize 12
 title ukagaka-shell
 
 class Vector3 {
@@ -17,7 +22,116 @@ class Vector3 {
 class Matrix {
     +[[Number,],]
     +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+    +scale(xScale, yScale, zScale)
+    +premultiply(Matrix|Number)
+    +multiply(Matrix|Number)
+    +add(Matrix)
 }
 
-Vector3 <-o "n" Matrix
+class Geometry {
+    +Vector3: [Vector3]
+    +visibility: Boolean
+    +matrix: Matrix
+    +drawMe(canvas)
+    +addTo(CoordinateSystem)
+    --set vector3 CoordinateSystem.matrix--
+    +removeFrom(CoordinateSystem)
+    +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+    +scale(xScale, yScale, zScale)
+}
+
+class CoordinateSystem{
+    +parent: CoordinateSystem
+    +children: [CoordinateSystem]
+    +matrix: Matrix
+    +globalMatrix: Matrix
+    +xAxis: [Number, Number, Number]
+    +yAxis: [Number, Number, Number]
+    +zAxis: [Number, Number, Number]
+    +origin: [Number, Number, Number]
+    +set(xAxis|yAxis|zAxis|origin|matrix, value)
+    +add(vector3|geometry)
+    --set CoordinateSystem.matrix--
+    +remove(vector3|geometry)
+    +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+    +scale(xScale, yScale, zScale)
+}
+
+class Point{
+    +origin: vector3s[0]
+    +radius: Number
+    +color: String
+    +drawMe(canvas)
+}
+
+class Curve{
+    +start: vector3s[0]
+    +control1: vector3s[1]
+    +control2: vector3s[2]
+    +end: vector3s[3]
+    +tangents: [Tangent]
+    +setTangent(percentage)
+    +drawMe(canvas)
+}
+
+class Line{
+    +start: vector3s[0]
+    +end: vector3s[1]
+    +tangents: [Tangent]
+    +drawme(canvas)
+    +setTangent(percentage)
+}
+
+class Tangent{
+    +base: Vector3
+    +vector3: Vector3
+}
+
+class Limb{
+    +base: {x, y}
+    +angle: Number
+    +scale: Number
+    +zIndex: Number
+    +width: Number
+    +height: Number
+    +skin: [Skin]
+    +matrix: globalMatrix
+    +rotate()
+    +translate()
+}
+
+class Morph{
+    +left: Number
+    +top: Number
+    +width: Number
+    +height: Number
+    +weight: Number
+}
+
+class Skin{
+    +morphs: {name: Morph,}
+    +func(Limb.matrix) Factory
+}
+
+Matrix "n" o--> Vector3
+Matrix "1" o--> CoordinateSystem 
+Matrix "1" o--> Geometry
+Vector3 "n" o--> Geometry
+Vector3 ..> Geometry:Use
+Vector3 ..> CoordinateSystem:Use
+Geometry <|-- Point:Extends
+Geometry <|-- Curve:Extends
+Geometry <|-- Line:Extends
+Tangent "1" o--> Curve
+Tangent --|> Line:Extends
+Tangent "1" o--> Line
+Limb ..> CoordinateSystem:Use
+Limb ..> Tangent:Use
+Morph ..> Limb:Use
+Morph "n" o--> Skin
+Skin "n" --> Limb
+
 @enduml
