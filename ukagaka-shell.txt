@@ -1,0 +1,23 @@
+@startuml
+skinparam class{
+    backgroundColor #fef3e3|#e8d7be
+    borderColor black
+    ArrowColor black
+}
+title ukagaka-shell
+
+class Vector3 {
+    +x: Number
+    +y: Number
+    +z: Number
+    +matrixs: [[Geometry.matrix,],[CoordinateSystem.matrix,],]
+    +addTo(CoordinateSystem)
+}
+
+class Matrix {
+    +[[Number,],]
+    +rotate(xAngle, yAngle, zAngle)
+}
+
+Vector3 <-o "n" Matrix
+@enduml
