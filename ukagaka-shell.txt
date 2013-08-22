@@ -43,7 +43,7 @@ class Geometry {
     +scale(xScale, yScale, zScale)
 }
 
-class CoordinateSystem{
+class CoordinateSystem {
     +parent: CoordinateSystem
     +children: [CoordinateSystem]
     +matrix: Matrix
@@ -62,14 +62,14 @@ class CoordinateSystem{
     +scale(xScale, yScale, zScale)
 }
 
-class Point{
+class Point {
     +origin: vector3s[0]
     +radius: Number
     +color: String
     +drawMe(canvas)
 }
 
-class Curve{
+class Curve {
     +start: vector3s[0]
     +control1: vector3s[1]
     +control2: vector3s[2]
@@ -77,11 +77,10 @@ class Curve{
     +tangents: [Tangent]
     +setTangent(percentage)
     +drawMe(canvas)
-})
     +rotate(xAngle, yAngle, zAngle)
+}
 
-
-class Line{
+class Line {
     +start: vector3s[0]
     +end: vector3s[1]
     +tangents: [Tangent]
@@ -89,12 +88,12 @@ class Line{
     +setTangent(percentage)
 }
 
-class Tangent{
+class Tangent {
     +base: Vector3
     +vector3: Vector3
 }
 
-class Limb{
+class Limb {
     +base: {x, y}
     +angle: Number
     +scale: Number
@@ -103,21 +102,37 @@ class Limb{
     +height: Number
     +skin: [Skin]
     +matrix: globalMatrix
-    +rotate()
-    +translate()
+    +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+}
+class Morph {
+    +weight: Number
+    +look()
 }
 
-class Morph{
+class VectorMorph {
+}
+
+class BitmapMorph {
     +left: Number
     +top: Number
     +width: Number
     +height: Number
-    +weight: Number
 }
 
-class Skin{
+class Skin {
     +morphs: {name: Morph,}
     +func(Limb.matrix) Factory
+}
+
+class Animation {
+    +frames: [frame]
+    +play()
+    +pause()
+    +stop()
+}
+
+class Frame {
 }
 
 Matrix "n" o--> Vector3
@@ -136,5 +151,8 @@ Limb ..> CoordinateSystem:Use
 Limb ..> Tangent:Use
 Morph "n" o--> Skin
 Skin "n" --> Limb
-
+Animation ..> Limb
+Frame "n" o--> Animation
+BitmapMorph --> Morph
+VectorMorph --> Morph
 @enduml
