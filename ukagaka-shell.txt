@@ -11,22 +11,24 @@ skinparam classAttributeFontName sans-serif
 skinparam classAttributeFontSize 12
 title ukagaka-shell
 
-class Vector3 {
+class Vector3d {
     +x: Number
     +y: Number
     +z: Number
     +matrixs: [[Geometry.matrix,],[CoordinateSystem.matrix,],]
     +addTo(CoordinateSystem)
+    +rotate(xAngle, yAngle, zAngle)
+    +scale(xScale, yScale, zScale)
+    +translate(x, y, z)
 }
 
-class Matrix {
-    +[[Number,],]
-    +rotate(xAngle, yAngle, zAngle)
-    +translate(x, y, z)
-    +scale(xScale, yScale, zScale)
+class Matrix3d {
+    -[[Number,Number,Number,Number],]
+    +add(Matrix|Number)
     +premultiply(Matrix|Number)
+    +postmultiply(Matrix|Number)
     +multiply(Matrix|Number)
-    +add(Matrix)
+    +x(Matrix|Number)
 }
 
 class Geometry {
