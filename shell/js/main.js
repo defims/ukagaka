@@ -1,19 +1,23 @@
-require([],function(){
-var Matrix  = function(){
-    var matrix  = [
-        [0,0,0,0],
-        [0,0,0,0],
-        [0,0,0,0],
-        [0,0,0,0]
-    ];
-    this.property["dot"]         =   function(){//M!*M2
-    };
-    this.property["multiply"]    =   function(){//M1xM2
-    };
-    this.property["o"]           =   function(){//M1*M2
-    };
-    this.property["x"]           =   function(){//M1xM2
-    };
-}
-
+require(["Matrix3d"],function(Matrix3d){
+	var M1	= new Matrix3d([
+		0,0,0,0,
+		0,1,0,0,
+		0,2,0,0,
+		0,4,0,0  
+	]);
+	console.log(M1.get())
+	M1.add([
+		0,0,0,0,
+		0,1,0,0,
+		0,2,0,0,
+		0,4,0,0  
+	]);
+	console.log(M1.get())
+	M1.x([
+		0,0,0,0,
+		0,1,0,0,
+		0,2,0,0,
+		0,4,0,0  
+	]);
+	console.log(M1.get())
 });
