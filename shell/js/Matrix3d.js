@@ -8,20 +8,18 @@ var M1    	= [
 	0,0,0,0     //  12,13,14,15 
 ],
 Matrix3d	= function(value){
-	this.set(value);
+	value && this.set(value);
 },
 $   		= Matrix3d.prototype;
 
 
-$["get"]			=	function(){
+$["get"]	=	function(){
 	return	M1;
 };
-
-$["set"]			= 	function(value){
+$["set"]    = 	function(value){
 	M1	= value;
 };
-
-$["add"]            =   function(M2){//M1+M2
+$["plus"]   =   $["add"]    =   function(M2){//M1+M2
 	this.set([
 		M1[0] + M2[0],      M1[1] + M2[1],      M1[2] + M2[2],      M1[3] + M2[3], 
 		M1[4] + M2[4],      M1[5] + M2[5],      M1[6] + M2[6],      M1[7] + M2[7], 
@@ -30,7 +28,6 @@ $["add"]            =   function(M2){//M1+M2
 	]);
 	return this.get();
 };
-
 $["premultiply"]    =   function(M2){//M2xM1
 	var a0  = M1[0],    a1  = M1[1],    a2  = M1[2],    a3  = M1[3], 
 		a4  = M1[4],    a5  = M1[5],    a6  = M1[6],    a7  = M1[7], 
@@ -48,8 +45,7 @@ $["premultiply"]    =   function(M2){//M2xM1
 		a0*b132 + a4*b13 + a8*b14 + a12*b15 , a1*b132 + a5*b13 + a9*b14 + a13*b15   , a2*b132 + a6*b13 + a10*b14 + a14*b15  , a3*b132 + a7*b13 + a11*b14 + a15*b15
 	];
 };
-
-$["postmultiply"]   =   function(M2){//M1xM2
+$["x"]  =   $["multiply"]   =   $["postmultiply"]   =   function(M2){//M1xM2
 	var M1	= this.get(),
 		a0  = M1[0],    a1  = M1[1],    a2  = M1[2],    a3  = M1[3], 
 		a4  = M1[4],    a5  = M1[5],    a6  = M1[6],    a7  = M1[7], 
@@ -69,10 +65,6 @@ $["postmultiply"]   =   function(M2){//M1xM2
 
 	return this.get();
 };
-
-$["multiply"]       =   $["postmultiply"];
-
-$["x"]              =   $["multiply"]; 
 
 return Matrix3d;
 

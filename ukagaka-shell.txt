@@ -12,11 +12,26 @@ skinparam classAttributeFontSize 12
 title ukagaka-shell
 
 class Vector3d {
-    +x: Number
-    +y: Number
-    +z: Number
+    -x: Number
+    -y: Number
+    -z: Number
     +matrixs: [[Geometry.matrix,],[CoordinateSystem.matrix,],]
+    +get('x'):x
+    +get('y'):y
+    +get('z'):z
+    +get():{x: x, y: y, z: z}
+    +set()
+    +normalize()
+    +x()
+    +crossProduct()
+    +o()
+    +dotProduct()
+    +length()
+    +squaredLength()
+    +toString()
+    +clone()
     +addTo(CoordinateSystem)
+    +transform()
     +rotate(xAngle, yAngle, zAngle)
     +scale(xScale, yScale, zScale)
     +translate(x, y, z)
