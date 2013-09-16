@@ -1,8 +1,8 @@
 define(function(){
 
-var x           = 0,
-    y           = 0,
-    z           = 0,
+var _x          = 0,
+    _y          = 0,
+    _z          = 0,
     Vector3d    = function(x,y,z){
         this.matrixs    = [[]];
         x && this.set(x,y,z); 
@@ -12,45 +12,62 @@ var x           = 0,
 $["get"]      = function(name){
     switch(name){
         case 'x':
-            return x;
+            return _x;
         break;
         case 'y':
-            return y;
+            return _y;
         break;
         case 'z':
-            return z;
+            return _z;
         break;
         default : 
-            return {x: x, y: y, z: z}
+            return {x: _x, y: _y, z: _z};
         break;
     }
     return 
 };
 $["set"]    =   function(x,y,z){
+    _x = x;
+    _y = y;
+    _z = z;
 };
 $["normalize"]  =   function(){
+    var length  = this.length(),
+        vec     = this.get();
+    this.set(vec.x/length, vec.y/length, vec.z/length);
+    return this.get();
 };
-$["x"]  =   $["crossProduct"]   =   function(){
+$["x"]  =   $["cross"]  =   $["crossProduct"]   =   function(){
 };
-$["o"]  =   $["dotProduct"] =   function(){
+$["o"]  =   $["dot"]    =   $["dotProduct"] =   function(){
 };
 $["length"] =   function(){
+    var vec   = this.get();
+    return Math.sqrt( vec.x * vec.x + vec.y * vec.y + vec.z * vec.z );
 };
 $["squaredLength"]  =   function(){
+    var vec   = this.get();
+    return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z; 
 };
 $["toString"]   =   function(){
+    var vec   = this.get();
+    return "("+ vec.x +","+vec.y+","+vec.z+")";
 };
 $["clone"]          = function(){
+    var vec   = this.get();
+    return new Vector3d(vec.x, vec.y, vec.z);
 };
 $["addTo"]          = function(){
 };
-$["transform"]      = function(M1){//M1
+$["angleBetween"]   = function(){
 };
-$["rotate"]         = function(){//M1xM2
+$["transform"]      = function(){
 };
-$["translate"]      = function(){//M1*M2
+$["rotate"]         = function(){
 };
-$["scale"]          = function(){//M1xM2
+$["translate"]      = function(){
+};
+$["scale"]          = function(){
 };
 
 return Vector3d;

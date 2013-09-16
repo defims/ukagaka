@@ -37,13 +37,20 @@ class Vector3d {
     +translate(x, y, z)
 }
 
-class Matrix3d {
-    -[[Number,Number,Number,Number],]
-    +add(Matrix|Number)
-    +premultiply(Matrix|Number)
-    +postmultiply(Matrix|Number)
-    +multiply(Matrix|Number)
-    +x(Matrix|Number)
+class Matrix4x4 {
+    -M1:[[Number,Number,Number,Number],]
+    +add(Matrix)
+    +add(Number)
+    +plus(Matrix)
+    +plus(Number)
+    +premultiply(Matrix)
+    +premultiply(Number)
+    +postmultiply(Matrix)
+    +postmultiply(Number)
+    +multiply(Matrix)
+    +multiply(Number)
+    +x(Matrix)
+    +x(Number)
 }
 
 class Geometry {
