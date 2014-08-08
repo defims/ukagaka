@@ -1,0 +1,182 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam class{
+    backgroundColor #fef3e3|#e8d7be
+    borderColor black
+    ArrowColor black
+    fontName    sans-serif
+    fontStyle   bold
+}
+skinparam classAttributeFontName sans-serif
+skinparam classAttributeFontSize 12
+title ukagaka-shell
+
+class Vector3d {
+    -x: Number
+    -y: Number
+    -z: Number
+    +matrixs: [[Geometry.matrix,],[CoordinateSystem.matrix,],]
+    +get('x'):x
+    +get('y'):y
+    +get('z'):z
+    +get():{x: x, y: y, z: z}
+    +set()
+    +normalize()
+    +x()
+    +crossProduct()
+    +o()
+    +dotProduct()
+    +length()
+    +squaredLength()
+    +toString()
+    +clone()
+    +addTo(CoordinateSystem)
+    +transform()
+    +rotate(xAngle, yAngle, zAngle)
+    +scale(xScale, yScale, zScale)
+    +translate(x, y, z)
+}
+
+class Matrix4x4 {
+    -M1:[[Number,Number,Number,Number],]
+    +add(Matrix)
+    +add(Number)
+    +plus(Matrix)
+    +plus(Number)
+    +premultiply(Matrix)
+    +premultiply(Number)
+    +postmultiply(Matrix)
+    +postmultiply(Number)
+    +multiply(Matrix)
+    +multiply(Number)
+    +x(Matrix)
+    +x(Number)
+}
+
+class Geometry {
+    +Vector3: [Vector3]
+    +visibility: Boolean
+    +matrix: Matrix
+    ----
+    +drawMe(canvas)
+    +addTo(CoordinateSystem)
+    --set vector3 CoordinateSystem.matrix--
+    +removeFrom(CoordinateSystem)
+    +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+    +scale(xScale, yScale, zScale)
+}
+
+class CoordinateSystem {
+    +parent: CoordinateSystem
+    +children: [CoordinateSystem]
+    +matrix: Matrix
+    +globalMatrix: Matrix
+    +xAxis: [Number, Number, Number]
+    +yAxis: [Number, Number, Number]
+    +zAxis: [Number, Number, Number]
+    +origin: [Number, Number, Number]
+    ----
+    +set(xAxis|yAxis|zAxis|origin|matrix, value)
+    +add(vector3|geometry)
+    --set CoordinateSystem.matrix--
+    +remove(vector3|geometry)
+    +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+    +scale(xScale, yScale, zScale)
+}
+
+class Point {
+    +origin: vector3s[0]
+    +radius: Number
+    +color: String
+    +drawMe(canvas)
+}
+
+class Curve {
+    +start: vector3s[0]
+    +control1: vector3s[1]
+    +control2: vector3s[2]
+    +end: vector3s[3]
+    +tangents: [Tangent]
+    +setTangent(percentage)
+    +drawMe(canvas)
+    +rotate(xAngle, yAngle, zAngle)
+}
+
+class Line {
+    +start: vector3s[0]
+    +end: vector3s[1]
+    +tangents: [Tangent]
+    +drawme(canvas)
+    +setTangent(percentage)
+}
+
+class Tangent {
+    +base: Vector3
+    +vector3: Vector3
+}
+
+class Limb {
+    +base: {x, y}
+    +angle: Number
+    +scale: Number
+    +zIndex: Number
+    +width: Number
+    +height: Number
+    +skin: [Skin]
+    +matrix: globalMatrix
+    +rotate(xAngle, yAngle, zAngle)
+    +translate(x, y, z)
+}
+class Morph {
+    +weight: Number
+    +look()
+}
+
+class VectorMorph {
+}
+
+class BitmapMorph {
+    +left: Number
+    +top: Number
+    +width: Number
+    +height: Number
+}
+
+class Skin {
+    +morphs: {name: Morph,}
+    +func(Limb.matrix) Factory
+}
+
+class Animation {
+    +frames: [frame]
+    +play()
+    +pause()
+    +stop()
+}
+
+class Frame {
+}
+
+Matrix "n" o--> Vector3
+Matrix "1" o--> CoordinateSystem 
+Matrix "1" o--> Geometry
+Vector3 "n" o--> Geometry
+Vector3 ..> Geometry:Use
+Vector3 ..> CoordinateSystem:Use
+Geometry <|-- Point:Extends
+Geometry <|-- Curve:Extends
+Geometry <|-- Line:Extends
+Tangent "1" o--> Curve
+Tangent --|> Line:Extends
+Tangent "1" o--> Line
+Limb ..> CoordinateSystem:Use
+Limb ..> Tangent:Use
+Morph "n" o--> Skin
+Skin "n" --> Limb
+Animation ..> Limb
+Frame "n" o--> Animation
+BitmapMorph --> Morph
+VectorMorph --> Morph
+@enduml
